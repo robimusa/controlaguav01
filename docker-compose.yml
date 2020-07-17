@@ -1,0 +1,11 @@
+version: "3"
+
+services: 
+    app:
+        build: .
+        image: consumoaguaimg
+        container_name: consumoaguacont
+        ports:
+            - "5100:5000"
+        # volumes:
+        #     - ./src:/app
