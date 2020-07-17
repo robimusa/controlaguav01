@@ -6,6 +6,6 @@ services:
         image: consumoaguaimg
         container_name: consumoaguacont
         ports:
-            - "5100:5000"
+            - "4100:4000"
         # volumes:
         #     - ./src:/app
