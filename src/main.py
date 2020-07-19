@@ -48,7 +48,7 @@ def entrarNuevoConsumo():
             nuevoregistro = {"fecha": fecha, "manana": manana,
                             "mediodia": mediodia, "tarde": tarde, "noche": noche, "total_consumo_diario": total}
             coleccion.insert_one(nuevoregistro)
-            return redirect(url_for('nuevoConsumo'))
+            return redirect(url_for('mostrarTodos'))
         except ValueError:
             raise Exception("Valor no posible para conversión")
     return redirect(url_for('nuevoConsumo'))
@@ -56,7 +56,7 @@ def entrarNuevoConsumo():
 
 @app.route("/mostrar-todos")
 def mostrarTodos():
-    registros = coleccion.find()
+    registros = coleccion.find().sort("fecha", -1) #Descendente: Primero las fechas más recientes
     tituloDelListado = "Listado de todos los consumos"
     return render_template('mostrar-todos.html', datos=registros, tituloDelListado=tituloDelListado)
 
@@ -68,20 +68,26 @@ def editarConsumo(id):
     return render_template('/editar.html', datos=registro)
 
 
-@app.route("/editar-confirmado/<id>", methods=['GET', 'POST'])
-def actualizarConsumo(id):
+@app.route("/editar-confirmado", methods=['GET', 'POST'])
+def actualizarConsumo():
     if request.method == 'POST':
-        fecha = request.form['fecha']
-        manana = request.form['manana']
-        mediodia = request.form['mediodia']
-        tarde = request.form['tarde']
-        noche = request.form['noche']
-        registroActualizado = {"fecha": fecha, "manana": manana,
-                               "mediodia": mediodia, "tarde": tarde, "noche": noche}
-        buscarPorId = {"_id": ObjectId(id)}
-        coleccion.update_one(buscarPorId, {"$set": registroActualizado})
-        return redirect(url_for('mostrarTodos'))
-    return redirect(url_for('editarConsumo'))
+        try:
+            fecha = request.form['fecha']
+            # Conversión de texto a float, si no es posible conversión a 0
+            manana = convert_to_float(request.form['manana'], 0)
+            mediodia = convert_to_float(request.form['mediodia'], 0)
+            tarde = convert_to_float(request.form['tarde'], 0)
+            noche = convert_to_float(request.form['noche'], 0)
+            # sumamos todo y dividimos entre 4 para que nos de litros (4 vasos = litro)
+            total = (manana + mediodia + tarde + noche)/4 
+            registroActualizado = {"fecha": fecha, "manana": manana,
+                            "mediodia": mediodia, "tarde": tarde, "noche": noche, "total_consumo_diario": total}
+            buscarPorId = {"_id": ObjectId(request.form["id"])}
+            coleccion.update_one(buscarPorId, {"$set": registroActualizado})
+            return redirect(url_for('mostrarTodos'))
+        except ValueError:
+            raise Exception("Conversión no posible")
+    return redirect(url_for('mostrarTodos'))
 
 @app.route("/borrar/<id>")
 def borrarConsumo(id):
@@ -95,7 +101,6 @@ def confirmadoBorrado(id):
     buscarPorId = {"_id": ObjectId(id)}
     coleccion.delete_one(buscarPorId)
     return redirect(url_for('mostrarTodos'))
-
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 4000))

@@ -1,5 +1,5 @@
 <!-- MUESTRA UN LISTADO DE LOS REGISTROS -->
-<!-- Los registros a mostrar viene dado pora la variable que le pasamos registros -->
+<!-- Los registros a mostrar viene dado por la variable que le pasamos: datos -->
 <!-- Le pasamos el título del listado por la variable tituloDeListado -->
 
 <br>
@@ -19,6 +19,7 @@
     <tbody>
         {% for consumo in datos %}
             <tr>
+                <input type="hidden" value="{{ consumo._id }}"">
                 <td>
                     <a class="btn btn-sm btn-success" href="/editar/{{ consumo._id }}">Editar</a>
                     <a class="btn btn-sm btn-danger" href="/borrar/{{ consumo._id }}">Borrar</a>
