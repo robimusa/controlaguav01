@@ -13,7 +13,7 @@
             <td>Mediodia</td>
             <td>Tarde</td>
             <td>Noche</td>
-            <td>Total</td>
+            <td>Total (Litros)</td>
         </tr>
     </thead>
     <tbody>
@@ -28,7 +28,7 @@
                 <td>{{ consumo.mediodia }}</td>
                 <td>{{ consumo.tarde }}</td>
                 <td>{{ consumo.noche }}</td>
-                <td>Total(dónde lo calculo)</td>
+                <td>{{ consumo.total_consumo_diario }}</td>
             </tr>
         {% endfor %}
     </tbody>

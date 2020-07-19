@@ -1,6 +1,6 @@
 <h3>Introduce un nuevo consumo: </h3>
 <form action="/entrar-nuevo" method="POST">
-    <input type="date" name="fecha" placeholder="Fecha">
+    <input type="date" name="fecha" placeholder="Fecha" value="{{ fecha_actual.strftime("%Y-%m-%d") }}">
     <input type="number" name="manana" placeholder="Mañana">
     <input type="number" name="mediodia" placeholder="Mediodia">
     <input type="number" name="tarde" placeholder="Tarde">

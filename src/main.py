@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, redirect, url_for
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import os
+from datetime import datetime, timedelta
 
 # CONEXION MONGODB + BASE DE DATOS + COLECCION
 URL_MONGO = 'mongodb+srv://Invitado:Guest5050@cluster0-3lrrr.mongodb.net/test?retryWrites=true&w=majority'
@@ -14,6 +15,13 @@ coleccion = db['consumoagua']
 
 app = Flask(__name__)
 
+# FUNCIONES
+def convert_to_float(valor, valordefecto):
+    try:
+        return float(valor)
+    except:
+        return valordefecto
+
 # RUTAS
 @app.route('/', methods=["GET", "POST"])
 def home():
@@ -22,21 +30,27 @@ def home():
 
 @app.route("/nuevo")
 def nuevoConsumo():
-    return render_template('nuevo.html')
+    return render_template('nuevo.html', fecha_actual=datetime.utcnow())
 
 
 @app.route("/entrar-nuevo", methods=['GET', 'POST'])
 def entrarNuevoConsumo():
     if request.method == 'POST':
-        fecha = request.form['fecha']
-        manana = request.form['manana']
-        mediodia = request.form['mediodia']
-        tarde = request.form['tarde']
-        noche = request.form['noche']
-        nuevoregistro = {"fecha": fecha, "manana": manana,
-                         "mediodia": mediodia, "tarde": tarde, "noche": noche}
-        coleccion.insert_one(nuevoregistro)
-        return redirect(url_for('nuevoConsumo'))
+        try:
+            fecha = request.form['fecha']
+            # Conversión de texto a float, si no es posible conversión a 0
+            manana = convert_to_float(request.form['manana'], 0)
+            mediodia = convert_to_float(request.form['mediodia'], 0)
+            tarde = convert_to_float(request.form['tarde'], 0)
+            noche = convert_to_float(request.form['noche'], 0)
+            # sumamos todo y dividimos entre 4 para que nos de litros (4 vasos = litro)
+            total = (manana + mediodia + tarde + noche)/4 
+            nuevoregistro = {"fecha": fecha, "manana": manana,
+                            "mediodia": mediodia, "tarde": tarde, "noche": noche, "total_consumo_diario": total}
+            coleccion.insert_one(nuevoregistro)
+            return redirect(url_for('nuevoConsumo'))
+        except ValueError:
+            raise Exception("Valor no posible para conversión")
     return redirect(url_for('nuevoConsumo'))
 
 
